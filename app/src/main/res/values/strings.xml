@@ -5,7 +5,4 @@
     <string name="error_location">"Turn on location to allow the app to determine your position"</string>
     <string name="error_location_service">"Turn on location services to allow the app to determine your position"</string>
     <string name="error_server_responsecode">"Server response error"</string>
-    <string name="error_json">"Server response format error"</string>
-    <string name="error_connect">"Failed to connect..."</string>
-    <string name="error_not_connect">"Not connected..."</string>
 </resources>

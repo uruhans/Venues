@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
 
     <TextView android:id="@+id/name"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:textStyle="bold"
@@ -12,10 +12,13 @@
         android:ellipsize="end"
         android:text="xxx"
         />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
     <TextView android:id="@+id/address"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
+        android:layout_alignParentTop="true"
         android:singleLine="true"
         android:ellipsize="end"
         android:text="xxx"
@@ -23,9 +26,41 @@
     <TextView android:id="@+id/distance"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
+        android:layout_below="@+id/address"
         android:singleLine="true"
         android:ellipsize="end"
         android:text="xxx"
         />
+
+        <ImageView
+            android:id="@+id/maps"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentRight="true"
+            android:scaleType="fitXY"
+            android:background="@drawable/maps_selector"
+            android:visibility="visible">
+        </ImageView>
+
+        <ImageView
+            android:id="@+id/phone"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_toLeftOf="@id/maps"
+            android:layout_marginRight="10dp"
+            android:scaleType="fitXY"
+            android:background="@drawable/phone_selector"
+            android:visibility="visible">
+        </ImageView>
+        <ImageView
+            android:id="@+id/google"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_toLeftOf="@id/phone"
+            android:layout_marginRight="10dp"
+            android:scaleType="fitXY"
+            android:background="@drawable/google_selector"
+            android:visibility="visible">
+        </ImageView>
+    </RelativeLayout>
 </LinearLayout>
