@@ -1,10 +1,11 @@
 package com.uruhans.code;
 
 /**
- * Created by uffhan on 17-02-2016.
+ * Interface for FoursquareInteractorImpl
  */
-public interface IMainInteractor {
+public interface IFoursquareInteractor {
     void getServerData(String latLong, String search, boolean useCache);
+    void checkNetwork();
     void unSubscribe();
 
 }

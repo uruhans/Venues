@@ -3,20 +3,18 @@ package com.uruhans.code;
 import android.app.Application;
 
 /**
- * Created by uruha on 28-02-2016.
+ * The global context for the app
  */
 public class MainApplication extends Application {
-    private NetworkService networkService;
+    private FoursquareService networkService;
 
     @Override
     public void onCreate() {
         super.onCreate();
-
-        networkService = new NetworkService();
-
+        networkService = new FoursquareService();
     }
 
-    public NetworkService getNetworkService() {
+    public FoursquareService getNetworkService() {
         return networkService;
     }
 }

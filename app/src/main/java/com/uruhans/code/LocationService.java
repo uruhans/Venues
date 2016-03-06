@@ -87,7 +87,7 @@ public class LocationService extends Service implements
     }
 
     protected void sendLocation(Location location) {
-        Log.e(TAG, "YYYYY sending location");
+        Log.d(TAG, "YYYYY sending location " + String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude()));
         EventBus.getDefault().post(new LocationEvent(R.id.new_location, String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude())));
     }
 
@@ -153,6 +153,8 @@ public class LocationService extends Service implements
             }
 
             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+
+            Log.d(TAG, "new location request");
 
             Executors.newScheduledThreadPool(1).schedule(new Runnable() {
                 @Override

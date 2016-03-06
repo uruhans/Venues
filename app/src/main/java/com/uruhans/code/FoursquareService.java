@@ -17,18 +17,18 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class NetworkService {
+public class FoursquareService {
 
     private static String baseUrl ="https://api.foursquare.com/";
     private NetworkAPI networkAPI;
     private OkHttpClient okHttpClient;
     private LruCache<Class<?>, Observable<?>> apiObservables;
 
-    public NetworkService(){
+    public FoursquareService(){
         this(baseUrl);
     }
 
-    public NetworkService(String baseUrl){
+    public FoursquareService(String baseUrl){
         okHttpClient = buildClient();
         apiObservables = new LruCache<>(10);
         Retrofit retrofit = new Retrofit.Builder()

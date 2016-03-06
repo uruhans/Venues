@@ -1,6 +1,8 @@
 package com.uruhans.code;
 
 import android.app.Activity;
+import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -8,19 +10,28 @@ import java.util.ArrayList;
 import de.greenrobot.event.EventBus;
 
 /**
- * Created by uffhan on 17-02-2016.
+ * This presenter handles communication between the MainActivity and the Location service, the data provider and the model
  */
-public class MainPresenterImpl implements IMainPresenter, MainInteractorImpl.MainInteractorListener, VenueAdapter.VenueAdapterListener {
+public class MainPresenterImpl implements IMainPresenter, FoursquareInteractorImpl.FoursquareInteractorListener, VenueAdapter.VenueAdapterListener {
 
-    //Copenhagen 2100
-    private String coordinates = "57.702522,12.5901542";
+    //Göteborg, Sweeden
+    private String coordinates = "57.717437,11.962470";
     private IMainView mView;
-    private IMainInteractor mInteractor;
+    private IFoursquareInteractor foursquareInteractor;
+    private ILocationInteractor locationInteraction;
     private VenueAdapter adapter;
+    private String searchString;
+    private FoursquareService service;
+    private Context context;
+    private boolean mUseCache;
 
-    public MainPresenterImpl(IMainView mView, NetworkService service) {
+    public MainPresenterImpl(IMainView mView) {
         this.mView = mView;
-        this.mInteractor = new MainInteractorImpl((Activity) mView, this, service);
+        this.context = (Activity) mView;
+        MainApplication mainApplication = (MainApplication) context.getApplicationContext();
+        service = mainApplication.getNetworkService();
+        this.foursquareInteractor = new FoursquareInteractorImpl((Activity) mView, this, service);
+        locationInteraction = new LocationInteractionImpl((Activity) mView);
     }
 
     @Override
@@ -34,19 +45,39 @@ public class MainPresenterImpl implements IMainPresenter, MainInteractorImpl.Mai
         mView.setReply(adapter);
     }
 
-    //Message from EventBus
+    @Override
+    public void onNetworkchecked(boolean networkok) {
+        if (networkok) {
+            foursquareInteractor.getServerData(coordinates, searchString, mUseCache);
+        } else {
+            mView.showMessage(R.id.no_network, R.string.error_network);
+        }
+    }
+
     public void onEvent(LocationEvent event){
-        if (event.getId() == R.id.new_location) {
-            Log.d("XXXX", "we have location : " + event.getMessage());
-            coordinates = event.getMessage();
-            mView.setCoordinates(coordinates);
-        } else if (event.getId() == R.id.location_disabled) {
-            Log.d("XXXX", "location disabled");
-            mView.showMessage(R.id.location_disabled, R.string.error_location);
-            mView.restartLocationService();
-        } else if (event.getId() == R.id.no_google_api) {
-            Log.d("XXXX", "missing google api");
-            mView.showMessage(R.id.no_google_api, R.string.error_location_service);
+        switch (event.getId()) {
+            case R.id.new_location : {
+                Log.d("XXXX", "we have location : " + event.getMessage());
+                coordinates = event.getMessage();
+                mView.setCoordinates(coordinates);
+                if (!TextUtils.isEmpty(searchString))
+                    search(searchString, false);
+                break;
+            }
+            case R.id.location_disabled : {
+                Log.d("XXXX", "location disabled");
+                mView.showMessage(R.id.location_disabled, R.string.error_location);
+                //mView.restartLocationService();
+                break;
+            }
+            case R.id.no_google_api : {
+                Log.d("XXXX", "missing google api");
+                mView.showMessage(R.id.no_google_api, R.string.error_location_service);
+                break;
+            }
+            default: {
+                Log.d("XXXX", "unknown Event from EventBus ???");
+            }
         }
     }
 
@@ -58,7 +89,9 @@ public class MainPresenterImpl implements IMainPresenter, MainInteractorImpl.Mai
 
     @Override
     public void search(String searchString, boolean useCache) {
-        mInteractor.getServerData(coordinates, searchString, useCache);
+        mUseCache = useCache;
+        this.searchString = searchString;
+        foursquareInteractor.checkNetwork();
     }
 
     @Override
@@ -67,16 +100,18 @@ public class MainPresenterImpl implements IMainPresenter, MainInteractorImpl.Mai
     }
 
     public void rxUnSubscribe(){
-        mInteractor.unSubscribe();
+        foursquareInteractor.unSubscribe();
     }
 
     @Override
-    public void eventBusSubscribe() {
+    public void locationSubscribe() {
         EventBus.getDefault().register(this);
+        locationInteraction.startService();;
     }
 
     @Override
-    public void eventBusUnSubscribe() {
+    public void locationUnSubscribe() {
+        locationInteraction.stopService();
         EventBus.getDefault().unregister(this);
     }
 
@@ -88,16 +123,19 @@ public class MainPresenterImpl implements IMainPresenter, MainInteractorImpl.Mai
 
     @Override
     public void onMapClicked(Venues.Response.Venue venue) {
-        mView.launchMap(venue.location.lat + "," + venue.location.lng, venue.name);
+        ILauncher launcher = new Launcher();
+        launcher.launchGoogleMaps(context, venue.location.lat + "," + venue.location.lng, venue.name);
     }
 
     @Override
     public void onGoogleClicked(Venues.Response.Venue venue) {
-        mView.launchGoogle(venue.name, venue.location.address);
+        ILauncher launcher = new Launcher();
+        launcher.launchGoogle(context, venue.name + venue.location.address);
     }
 
     @Override
     public void onPhoneClicked(Venues.Response.Venue venue) {
-       mView.launchDialer(venue.contact.phone);
+        ILauncher launcher = new Launcher();
+        launcher.launchDial(context, venue.contact.phone);
     }
 }

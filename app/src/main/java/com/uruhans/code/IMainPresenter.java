@@ -1,13 +1,13 @@
 package com.uruhans.code;
 
 /**
- * Created by uffhan on 17-02-2016.
+ * Interface for MainPresenter
  */
 public interface IMainPresenter {
     void search(String searchString, boolean useCache);
     void setCoordinates(String coordinates);
     void rxUnSubscribe();
-    void eventBusSubscribe();
-    void eventBusUnSubscribe();
+    void locationSubscribe();
+    void locationUnSubscribe();
     void networkAvailable(boolean available);
 }

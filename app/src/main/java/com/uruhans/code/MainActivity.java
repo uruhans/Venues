@@ -28,17 +28,14 @@ public class MainActivity extends Activity implements IMainView{
     private static final String EXTRA_RX = "EXTRA_RX";
     private static final String SEARCH = "EXTRA_SEARCH";
     private static final String SEARCH_COORDINATES = "EXTRA_SEARCH_COORDINATES";
-    private NetworkService service;
     private boolean rxCallInWorks = false;
-    private boolean locationHasBeenOff = false;
     private String coordinates;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        service = ((MainApplication)getApplication()).getNetworkService();
-        mPresenter = new MainPresenterImpl(this, service);
+        mPresenter = new MainPresenterImpl(this);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         listViewVenues = (ListView) findViewById(R.id.venue_list);
         search = (EditText) findViewById(R.id.search);
@@ -53,10 +50,6 @@ public class MainActivity extends Activity implements IMainView{
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (locationHasBeenOff) {
-                    startService(new Intent(MainActivity.this, LocationService.class));
-                    locationHasBeenOff = false;
-                }
                 rxCallInWorks = true;
                 if (search.getText().toString().isEmpty())
                     listViewVenues.setAdapter(null);
@@ -75,9 +68,8 @@ public class MainActivity extends Activity implements IMainView{
     @Override
     protected void onPause() {
         super.onPause();
-        mPresenter.eventBusUnSubscribe();
+        mPresenter.locationUnSubscribe();
         mPresenter.rxUnSubscribe();
-        stopService(new Intent(this, LocationService.class));
     }
 
     @Override
@@ -91,15 +83,8 @@ public class MainActivity extends Activity implements IMainView{
     @Override
     protected void onResume() {
         super.onResume();
-        mPresenter.eventBusSubscribe();
-        startService(new Intent(this, LocationService.class));
-        if (isNetworkAvailable()) {
-            if(rxCallInWorks) {
-                mPresenter.search(search.getText().toString(), true);
-            }
-        } else {
-           mPresenter.networkAvailable(false);
-        }
+        mPresenter.locationSubscribe();
+        mPresenter.search(search.getText().toString(), true);
     }
 
     @Override
@@ -109,21 +94,6 @@ public class MainActivity extends Activity implements IMainView{
         } else {
             listViewVenues.setAdapter(null);
         }
-    }
-
-    @Override
-    public void launchMap(String coordinates, String name) {
-        launchGoogleMaps(coordinates, name);
-    }
-
-    @Override
-    public void launchGoogle(String name, String address) {
-        launchGoogle(name + " " + address);
-    }
-
-    @Override
-    public void launchDialer(String phoneNumber) {
-        launchDial(phoneNumber);
     }
 
     @Override
@@ -139,7 +109,7 @@ public class MainActivity extends Activity implements IMainView{
                     @Override
                     public void onClick(View view) {
                         if (messageId == R.id.no_network || messageId == R.id.location_disabled) {
-                            startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
+                            //startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
                         }
                     }
                 });
@@ -157,48 +127,5 @@ public class MainActivity extends Activity implements IMainView{
         textView.setTextColor(Color.RED);
 
         snackbar.show();
-    }
-
-    @Override
-    public void restartLocationService() {
-        stopService(new Intent(this, LocationService.class));
-        locationHasBeenOff = true;
-    }
-
-    // Check if the device has network access
-    public boolean isNetworkAvailable() {
-        ConnectivityManager cm = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        // if no network is available networkInfo will be null
-        // otherwise check if we are connected
-        if (networkInfo != null && networkInfo.isConnected()) {
-            return true;
-        }
-        return false;
-    }
-
-    //Launch Google Maps with location
-    private void launchGoogleMaps(String coordinates, String name) {
-        Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + coordinates + " (" + name + ")");
-        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-        mapIntent.setPackage("com.google.android.apps.maps");
-        if (mapIntent.resolveActivity(getPackageManager()) != null) {
-            startActivity(mapIntent);
-        }
-    }
-
-    //Open the Dialer with number
-    private void launchDial(String number) {
-        Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.setData(Uri.parse("tel:" + number));
-        startActivity(intent);
-    }
-
-    //Open the Dialer with number
-    private void launchGoogle(String searchString) {
-        Uri uri = Uri.parse("http://www.google.com/#q=" + searchString);
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        startActivity(intent);
     }
 }

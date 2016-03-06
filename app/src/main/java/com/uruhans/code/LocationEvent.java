@@ -1,7 +1,7 @@
 package com.uruhans.code;
 
 /**
- * Created by uruha on 29-02-2016.
+ * LocationEvent is used for sending id/message by EventBus
  */
 public class LocationEvent {
     private final int id;
