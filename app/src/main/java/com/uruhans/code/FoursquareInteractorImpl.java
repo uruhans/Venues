@@ -14,11 +14,8 @@ import rx.Subscription;
  */
 public class FoursquareInteractorImpl implements IFoursquareInteractor {
     // Goto https://developer.foursquare.com/start, sign up and get CLIENT_ID & CLIENT_SECRET
-    //final String CLIENT_ID = "xxxx";
-    //final String CLIENT_SECRET = "zzzz";
-
-    final String CLIENT_ID = "NRFHU1NDVU0QXWOD5INDVODK0G0NITXIGV3X4IHIEAZUZSYI";
-    final String CLIENT_SECRET = "COUI5PMRCTAFPZVKQ01JQOVPR4QFTGIUGF4ZCCEWO12TAQKD";
+    final String CLIENT_ID = "xxxx";
+    final String CLIENT_SECRET = "zzzz";
 
     final String v = "20130815";
 
