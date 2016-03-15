@@ -3,6 +3,7 @@ package com.uruhans.code;
 import android.support.v4.util.LruCache;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -109,8 +110,8 @@ public class FoursquareService {
             return preparedObservable;
 
         //we are here because we have never created this observable before or we didn't want to use the cache...
-
         preparedObservable = unPreparedObservable.subscribeOn(Schedulers.newThread())
+                .debounce(400, TimeUnit.MILLISECONDS) // prevent to fast updates
                 .observeOn(AndroidSchedulers.mainThread());
 
         if(cacheObservable){
